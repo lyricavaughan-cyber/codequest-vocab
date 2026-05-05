@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeQuest — CS Vocab Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #070b12;
+    --surface:   #0d1520;
+    --border:    #1a3a5c;
+    --glow:      #00e5ff;
+    --glow2:     #39ff14;
+    --wrong:     #ff3a5c;
+    --correct:   #39ff14;
+    --text:      #c8ddf0;
+    --dim:       #4a6a8a;
+    --gold:      #ffd700;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-hd:   'Orbitron', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Scanlines overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.07) 2px, rgba(0,0,0,.07) 4px);
+    pointer-events: none; z-index: 100;
+  }
+
+  /* Grid background */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .wrap {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 720px;
+    padding: 20px;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .game-title {
+    font-family: var(--font-hd);
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: .12em;
+    color: var(--glow);
+    text-shadow: 0 0 18px var(--glow), 0 0 50px rgba(0,229,255,.3);
+    animation: flicker 6s infinite;
+  }
+
+  .game-subtitle {
+    font-size: .8rem;
+    letter-spacing: .3em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .byline {
+    font-size: .72rem;
+    color: var(--dim);
+    margin-top: 2px;
+    letter-spacing: .15em;
+  }
+
+  @keyframes flicker {
+    0%,96%,100% { opacity: 1; }
+    97% { opacity: .8; }
+    98% { opacity: 1; }
+    99% { opacity: .6; }
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px 30px;
+    box-shadow: 0 0 40px rgba(0,229,255,.05), inset 0 1px 0 rgba(0,229,255,.08);
+    margin-top: 18px;
+  }
+
+  /* ─── START SCREEN ─── */
+  #start-screen { text-align: center; }
+
+  .big-icon { font-size: 3.5rem; margin-bottom: 12px; }
+
+  .instructions {
+    text-align: left;
+    background: rgba(0,229,255,.04);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin: 18px 0 22px;
+    font-size: .82rem;
+    line-height: 1.9;
+    color: var(--text);
+  }
+
+  .instructions li { margin-left: 16px; }
+  .instructions strong { color: var(--glow); }
+
+  .win-rule {
+    background: rgba(57,255,20,.07);
+    border: 1px solid rgba(57,255,20,.3);
+    border-radius: 4px;
+    padding: 10px 16px;
+    margin: 12px 0 0;
+    font-size: .8rem;
+    color: var(--glow2);
+    letter-spacing: .05em;
+  }
+
+  label { font-size: .78rem; letter-spacing: .2em; color: var(--dim); display: block; margin-bottom: 6px; }
+
+  input[type="text"] {
+    width: 100%;
+    background: rgba(0,229,255,.05);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--glow);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    caret-color: var(--glow);
+    margin-bottom: 20px;
+  }
+  input[type="text"]:focus {
+    border-color: var(--glow);
+    box-shadow: 0 0 12px rgba(0,229,255,.2);
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-block;
+    font-family: var(--font-hd);
+    font-size: .75rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    padding: 12px 28px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .btn-primary {
+    background: var(--glow);
+    color: var(--bg);
+    box-shadow: 0 0 20px rgba(0,229,255,.4);
+    width: 100%;
+    font-size: .85rem;
+  }
+  .btn-primary:hover { box-shadow: 0 0 36px rgba(0,229,255,.7); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--dim);
+    border: 1px solid var(--border);
+    font-size: .72rem;
+  }
+  .btn-ghost:hover { border-color: var(--glow); color: var(--glow); }
+
+  /* ─── GAME SCREEN ─── */
+  #game-screen { display: none; }
+
+  .hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .78rem;
+    color: var(--dim);
+    margin-bottom: 6px;
+    letter-spacing: .1em;
+  }
+
+  .hud-score { color: var(--glow2); font-size: .9rem; }
+  .hud-player { color: var(--glow); }
+
+  /* Progress bar */
+  .progress-track {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--glow), var(--glow2));
+    border-radius: 2px;
+    transition: width .4s ease;
+    box-shadow: 0 0 8px rgba(0,229,255,.5);
+  }
+
+  .q-label {
+    font-size: .7rem;
+    letter-spacing: .25em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .q-text {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 6px;
+    min-height: 60px;
+  }
+
+  .q-example {
+    font-size: .78rem;
+    color: var(--dim);
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media (max-width: 480px) { .choices { grid-template-columns: 1fr; } }
+
+  .choice-btn {
+    background: rgba(0,229,255,.04);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: .88rem;
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .03em;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .choice-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--glow);
+    opacity: 0;
+    transition: opacity .15s;
+  }
+
+  .choice-btn:hover:not(:disabled) {
+    border-color: var(--glow);
+    color: var(--glow);
+    box-shadow: 0 0 12px rgba(0,229,255,.15);
+  }
+
+  .choice-btn.correct {
+    border-color: var(--correct);
+    background: rgba(57,255,20,.12);
+    color: var(--correct);
+    box-shadow: 0 0 18px rgba(57,255,20,.25);
+  }
+
+  .choice-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,58,92,.12);
+    color: var(--wrong);
+    box-shadow: 0 0 14px rgba(255,58,92,.2);
+  }
+
+  .choice-btn:disabled { cursor: default; }
+
+  /* Feedback banner */
+  .feedback {
+    text-align: center;
+    font-size: .85rem;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 14px;
+    letter-spacing: .1em;
+    opacity: 0;
+    transition: opacity .2s;
+    min-height: 40px;
+  }
+  .feedback.show { opacity: 1; }
+  .feedback.correct { color: var(--correct); background: rgba(57,255,20,.07); border: 1px solid rgba(57,255,20,.2); }
+  .feedback.wrong   { color: var(--wrong);   background: rgba(255,58,92,.07);  border: 1px solid rgba(255,58,92,.2); }
+
+  /* ─── RESULTS SCREEN ─── */
+  #results-screen { display: none; text-align: center; }
+
+  .result-icon { font-size: 4rem; margin-bottom: 10px; }
+
+  .result-title {
+    font-family: var(--font-hd);
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: .15em;
+    margin-bottom: 8px;
+  }
+  .result-title.win  { color: var(--glow2); text-shadow: 0 0 20px rgba(57,255,20,.5); }
+  .result-title.lose { color: var(--wrong);  text-shadow: 0 0 20px rgba(255,58,92,.4); }
+
+  .result-score {
+    font-size: 3rem;
+    font-family: var(--font-hd);
+    color: var(--gold);
+    text-shadow: 0 0 18px rgba(255,215,0,.4);
+    margin: 12px 0 4px;
+  }
+
+  .result-sub { font-size: .82rem; color: var(--dim); margin-bottom: 24px; }
+
+  .result-breakdown {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 24px;
+  }
+  .rb-item { text-align: center; }
+  .rb-num { font-size: 1.6rem; font-family: var(--font-hd); }
+  .rb-num.correct-c { color: var(--correct); }
+  .rb-num.wrong-c   { color: var(--wrong); }
+  .rb-label { font-size: .7rem; color: var(--dim); letter-spacing: .15em; }
+
+  .result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* ─── HOW I BUILT IT MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(7,11,18,.92);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-width: 560px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 32px;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,229,255,.1);
+    transform: translateY(16px);
+    transition: transform .3s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal h2 {
+    font-family: var(--font-hd);
+    font-size: 1rem;
+    letter-spacing: .2em;
+    color: var(--glow);
+    margin-bottom: 18px;
+  }
+
+  .modal p {
+    font-size: .82rem;
+    line-height: 1.85;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .modal p:last-of-type { margin-bottom: 0; }
+
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 20px;
+    background: none; border: none;
+    color: var(--dim); font-size: 1.2rem; cursor: pointer;
+    font-family: var(--font-mono);
+    transition: color .15s;
+  }
+  .modal-close:hover { color: var(--glow); }
+
+  .modal ul {
+    margin: 8px 0 14px 20px;
+    font-size: .82rem;
+    line-height: 1.9;
+    color: var(--text);
+  }
+
+  .modal strong { color: var(--glow); }
+
+  /* Footer link row */
+  .footer-row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .link-btn {
+    background: none; border: none;
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    color: var(--dim);
+    cursor: pointer;
+    letter-spacing: .15em;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color .15s;
+    padding: 0;
+  }
+  .link-btn:hover { color: var(--glow); }
+
+  /* Pulse animation for start */
+  @keyframes pulse-glow {
+    0%,100% { box-shadow: 0 0 20px rgba(0,229,255,.4); }
+    50%      { box-shadow: 0 0 44px rgba(0,229,255,.75); }
+  }
+  .pulse { animation: pulse-glow 2s ease-in-out infinite; }
+
+  /* Slide in screens */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .slide-in { animation: slideIn .35s ease both; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="game-title">CODE&thinsp;QUEST</div>
+    <div class="game-subtitle">CS Vocabulary Review Challenge</div>
+    <div class="byline">Created by <span id="creator-display">Lyrica</span></div>
+  </header>
+
+  <!-- ════════════ START SCREEN ════════════ -->
+  <div class="card slide-in" id="start-screen">
+    <div class="big-icon">💻</div>
+    <h2 style="font-family:var(--font-hd);font-size:.9rem;letter-spacing:.2em;color:var(--glow);margin-bottom:14px;">INITIALIZE PLAYER</h2>
+
+    <label for="player-name">PLAYER NAME</label>
+    <input type="text" id="player-name" placeholder="Enter your name..." maxlength="24" autocomplete="off">
+
+    <div class="instructions">
+      <strong>HOW TO PLAY</strong>
+      <ul>
+        <li>Read each definition carefully.</li>
+        <li>Choose the correct CS term from the 4 options.</li>
+        <li>Answer all <strong>15 questions</strong> to complete the game.</li>
+        <li>Green = correct &nbsp;|&nbsp; Red = wrong — no going back!</li>
+        <li>The next question loads automatically after 1 second.</li>
+      </ul>
+      <div class="win-rule">🏆 WIN CONDITION: Score 12 or more out of 15 to win!</div>
+    </div>
+
+    <button class="btn btn-primary pulse" id="start-btn">[ START GAME ]</button>
+
+    <div class="footer-row" style="margin-top:16px;">
+      <button class="link-btn" id="how-btn-start">🔧 Read How I Built This</button>
+    </div>
+  </div>
+
+  <!-- ════════════ GAME SCREEN ════════════ -->
+  <div class="card" id="game-screen">
+    <div class="hud">
+      <span class="hud-player" id="hud-player">PLAYER</span>
+      <span>Q <span id="q-num">1</span> / 15</span>
+      <span class="hud-score">✦ <span id="score-display">0</span></span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="q-label">DEFINE THE TERM →</div>
+    <div class="q-text" id="q-text">Loading...</div>
+    <div class="q-example" id="q-example"></div>
+
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <!-- ════════════ RESULTS SCREEN ════════════ -->
+  <div class="card slide-in" id="results-screen">
+    <div class="result-icon" id="result-icon">🏆</div>
+    <div class="result-title" id="result-title">YOU WIN</div>
+    <div class="result-score" id="result-score">15/15</div>
+    <div class="result-sub" id="result-sub">Perfect Score!</div>
+
+    <div class="result-breakdown">
+      <div class="rb-item">
+        <div class="rb-num correct-c" id="rb-correct">0</div>
+        <div class="rb-label">CORRECT</div>
+      </div>
+      <div class="rb-item">
+        <div class="rb-num wrong-c" id="rb-wrong">0</div>
+        <div class="rb-label">WRONG</div>
+      </div>
+      <div class="rb-item">
+        <div class="rb-num" style="color:var(--glow)" id="rb-pct">0%</div>
+        <div class="rb-label">ACCURACY</div>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" id="play-again-btn">[ PLAY AGAIN ]</button>
+      <button class="btn btn-ghost" id="how-btn-end">🔧 How I Built This</button>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- ════════════ MODAL ════════════ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">✕</button>
+    <h2>🔧 HOW I BUILT THIS</h2>
+
+    <p>
+      <strong>CodeQuest</strong> is a single-file HTML/CSS/JavaScript vocabulary review game built with help from <strong>Claude (Anthropic)</strong>. The goal was to create an engaging, polished study tool for CS Principles concepts.
+    </p>
+
+    <p><strong>Vocab Source:</strong><br>
+      All 15 terms are drawn directly from a structured word bank covering Foundations, Storage, Operators & Expressions, Logic & Control, Functions, Events & Interaction, and Best Practices.
+    </p>
+
+    <p><strong>Game Mechanics:</strong></p>
+    <ul>
+      <li>15 questions are randomly selected and shuffled each playthrough.</li>
+      <li>For each question, one correct term and three wrong distractors are chosen randomly from the full word bank.</li>
+      <li>Answer choices are shuffled so the correct answer is never in the same spot.</li>
+      <li>Win condition: score <strong>12 or more out of 15</strong>.</li>
+    </ul>
+
+    <p><strong>Design Choices:</strong><br>
+      The retro-terminal aesthetic (dark background, cyan glow, scanlines, grid) was chosen to match the computing theme. Fonts are <em>Orbitron</em> (display) and <em>Share Tech Mono</em> (body) from Google Fonts, giving it a distinct sci-fi/hacker feel that differs from typical educational apps.
+    </p>
+
+    <p><strong>Technical Stack:</strong><br>
+      Pure HTML, CSS, and vanilla JavaScript — no frameworks or libraries required. Runs entirely in the browser with zero dependencies beyond Google Fonts.
+    </p>
+  </div>
+</div>
+
+<script>
+// ─── VOCAB DATA (15 terms used in game) ───────────────────────────────────────
+const ALL_VOCAB = [
+  { term: "Algorithm",            def: "A step-by-step set of instructions for solving a problem.",                             ex: "e.g. Sorting a list of names A to Z" },
+  { term: "Variable",             def: "A named container in memory that stores a value that can change.",                      ex: "e.g. var score = 0" },
+  { term: "Boolean",              def: "A data type with only two possible values: true or false.",                             ex: "e.g. var isReady = true" },
+  { term: "String",               def: "A sequence of characters used to represent text.",                                      ex: 'e.g. var name = "Kai"' },
+  { term: "Function",             def: "A named, reusable block of code that performs a specific task.",                        ex: "e.g. function updateTotal() {...}" },
+  { term: "List",                 def: "An ordered collection of values stored under a single variable name.",                  ex: 'e.g. var colors = ["red","blue","green"]' },
+  { term: "Index",                def: "The position number used to access an element in a list, starting at 0.",               ex: 'e.g. colors[1] gives "blue"' },
+  { term: "Expression",           def: "A combination of values and operators that produces a single result.",                  ex: "e.g. 5 + 3 * 2" },
+  { term: "Event Handler",        def: "Code that waits for a specific event and runs when it occurs.",                         ex: 'e.g. onEvent("btn","click",function(){...})' },
+  { term: "Condition",            def: "A true or false question that controls what code runs.",                                ex: "e.g. score > 10" },
+  { term: "Conditional Statement",def: "Code that runs different instructions depending on whether a condition is true.",       ex: "e.g. if (score > 10) {...} else {...}" },
+  { term: "Concatenation",        def: "Joining two or more strings together into one.",                                        ex: 'e.g. "Hi " + name gives "Hi Kai"' },
+  { term: "Debugging",            def: "The process of finding and fixing errors in code.",                                     ex: "e.g. Tracing code line by line to find where it breaks" },
+  { term: "Comment",              def: "A note written in code that the program ignores, meant for humans to read.",            ex: "e.g. // this calculates the score" },
+  { term: "Event",                def: "An action that triggers code to run.",                                                  ex: "e.g. click, keydown, swipe" },
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────────
+let questions = [];
+let currentQ  = 0;
+let score     = 0;
+let playerName = "PLAYER";
+
+// ─── UTILS ─────────────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildQuestions() {
+  // Shuffle all vocab, take 15
+  const pool = shuffle(ALL_VOCAB);
+  return pool.map(correct => {
+    // 3 wrong choices from the rest
+    const wrong = shuffle(pool.filter(v => v.term !== correct.term)).slice(0, 3);
+    const choices = shuffle([correct, ...wrong]);
+    return { correct, choices };
+  });
+}
+
+// ─── SCREENS ───────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  ['start-screen','game-screen','results-screen'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = 'none';
+    el.classList.remove('slide-in');
+  });
+  const target = document.getElementById(id);
+  target.style.display = 'block';
+  void target.offsetWidth; // reflow
+  target.classList.add('slide-in');
+}
+
+// ─── GAME LOGIC ────────────────────────────────────────────────────────────────
+function startGame() {
+  const input = document.getElementById('player-name').value.trim();
+  playerName = input || 'PLAYER';
+  document.getElementById('hud-player').textContent = playerName.toUpperCase();
+
+  questions = buildQuestions();
+  currentQ  = 0;
+  score     = 0;
+
+  showScreen('game-screen');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = currentQ + 1;
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('progress-fill').style.width = ((currentQ / 15) * 100) + '%';
+  document.getElementById('q-text').textContent  = q.correct.def;
+  document.getElementById('q-example').textContent = q.correct.ex;
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+
+  q.choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.term;
+    btn.addEventListener('click', () => handleAnswer(choice, btn));
+    choicesEl.appendChild(btn);
+  });
+}
+
+function handleAnswer(choice, clickedBtn) {
+  const q   = questions[currentQ];
+  const all = document.querySelectorAll('.choice-btn');
+  all.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('feedback');
+  fb.classList.add('show');
+
+  if (choice.term === q.correct.term) {
+    score++;
+    clickedBtn.classList.add('correct');
+    fb.className = 'feedback show correct';
+    fb.textContent = '✓ CORRECT! ' + q.correct.term + ' — nice work!';
+  } else {
+    clickedBtn.classList.add('wrong');
+    // highlight correct
+    all.forEach(b => { if (b.textContent === q.correct.term) b.classList.add('correct'); });
+    fb.className = 'feedback show wrong';
+    fb.textContent = '✗ WRONG — the answer was: ' + q.correct.term;
+  }
+
+  document.getElementById('score-display').textContent = score;
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < 15) {
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  }, 1300);
+}
+
+function showResults() {
+  document.getElementById('progress-fill').style.width = '100%';
+  showScreen('results-screen');
+
+  const wrong = 15 - score;
+  const pct   = Math.round((score / 15) * 100);
+  const win   = score >= 12;
+
+  document.getElementById('result-icon').textContent  = win ? '🏆' : '💡';
+  const titleEl = document.getElementById('result-title');
+  titleEl.textContent  = win ? 'MISSION COMPLETE!' : 'KEEP STUDYING!';
+  titleEl.className    = 'result-title ' + (win ? 'win' : 'lose');
+
+  document.getElementById('result-score').textContent = score + ' / 15';
+  document.getElementById('result-sub').textContent   = win
+    ? (score === 15 ? '🌟 Perfect Score! You aced it!' : `You passed with ${pct}% accuracy!`)
+    : `You needed 12 to win — you got ${score}. Try again!`;
+
+  document.getElementById('rb-correct').textContent = score;
+  document.getElementById('rb-wrong').textContent   = wrong;
+  document.getElementById('rb-pct').textContent     = pct + '%';
+}
+
+// ─── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ─── EVENT LISTENERS ───────────────────────────────────────────────────────────
+document.getElementById('start-btn').addEventListener('click', startGame);
+
+document.getElementById('player-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startGame();
+});
+
+document.getElementById('play-again-btn').addEventListener('click', () => {
+  showScreen('start-screen');
+});
+
+document.getElementById('how-btn-start').addEventListener('click', openModal);
+document.getElementById('how-btn-end').addEventListener('click', openModal);
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+// Focus name field on load
+window.addEventListener('load', () => {
+  document.getElementById('player-name').focus();
+});
+</script>
+</body>
+</html>
